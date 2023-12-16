@@ -14,16 +14,7 @@ func (p *Problem) checkSolution(solution string) bool {
 	return solution == p.solution
 }
 
-func additionProblem(allowNegative bool) *Problem {
-	x := rand.Intn(21)
-	var b int
-	if allowNegative {
-		b = rand.Intn(41)-20
-	} else
-	{
-		b = rand.Intn(21)
-	}
-
+func additionProblem(x int, b int) *Problem {
 	var signB string
 	var absB int
 	if b < 0 {
@@ -38,4 +29,16 @@ func additionProblem(allowNegative bool) *Problem {
 		problem: fmt.Sprintf("x %s %d = %d", signB, absB, x+b),
 		solution: fmt.Sprintf("%d", x),
 	}
+}
+
+func randomAdditionProblem(allowNegative bool) *Problem {
+	x := rand.Intn(21)
+	var b int
+	if allowNegative {
+		b = rand.Intn(41)-20
+	} else
+	{
+		b = rand.Intn(21)
+	}
+	return additionProblem(x, b)
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestCheckSolution_WrongInput(t *testing.T) {
@@ -32,10 +33,11 @@ func TestCheckSolution_CorrectInput(t *testing.T) {
 	}
 }
 
-func TestEqAdd(t *testing.T) {
-	p := additionProblem(true)
+func TestAdditionProblem(t *testing.T) {
+	x := 5
+	p := additionProblem(x, -3)
 
-	if !p.checkSolution("p.solution"){
-		t.Fatalf(`Problem '%s': Solution '%s' was not accepted`, p.problem, p.solution)
+	if !p.checkSolution(fmt.Sprintf("%d", x)){
+		t.Fatalf(`Problem {'%s', '%s'} did not accept '%d' as the solution`, p.problem, p.solution, x)
 	}
 }
