@@ -33,9 +33,9 @@ func TestCheckSolution_CorrectInput(t *testing.T) {
 }
 
 func TestEqAdd(t *testing.T) {
-	p := additionProblem()
+	p := additionProblem(true)
 
-	if !p.checkSolution(p.solution){
+	if !p.checkSolution("p.solution"){
 		t.Fatalf(`Problem '%s': Solution '%s' was not accepted`, p.problem, p.solution)
 	}
 }
