@@ -12,6 +12,7 @@ type Client struct {
 	Conn   *websocket.Conn
 	Room   *Room
 	Points int
+	Problem *Problem
 }
 
 func NewClient(conn *websocket.Conn) *Client {
@@ -46,5 +47,15 @@ func (c *Client) handleMessages() {
 		}
 
 		// Implement other logic here, like handling game actions
+	}
+}
+
+func (c *Client) updateProblem() {
+	if c.Points > 100 {
+		c.Problem = randomMxbProblem()
+	} else if c.Points > 50 {
+		c.Problem = randomAdditionProblem(true)
+	} else {
+		c.Problem = randomAdditionProblem(false)
 	}
 }
