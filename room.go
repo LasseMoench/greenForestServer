@@ -54,14 +54,8 @@ const (
 
 func (r *Room) addClient(c *Client) {
 	r.Clients = append(r.Clients, c)
-
-	for _, client := range r.Clients {
-		log.Printf("Player %s joined room %s!", c.ID, r.ID)
-		err := client.Conn.WriteMessage(1, []byte(fmt.Sprintf("Player %s joined room %s!", c.ID, r.ID)))
-		if err != nil {
-			fmt.Errorf("error sending message: %w", err)
-		}
-	}
+	log.Printf("Player %s joined room %s!", c.ID, r.ID)
+	r.broadcast(fmt.Sprintf("Player %s joined room %s!", c.ID, r.ID))
 }
 
 func (r *Room) broadcast(message string) {
@@ -76,5 +70,33 @@ func (r *Room) broadcast(message string) {
 
 func (r *Room) startGame() {
 	log.Printf("Game in room %s is starting...", r.ID)
-	r.broadcast("start")
+	for _, c := range r.Clients {
+		// Generate new problem for client
+		c.updateProblem()
+		sm := gameStartMessage{
+			MessageType: "start",
+			Problem:     c.Problem.problem,
+		}
+		if err := c.Conn.WriteJSON(sm); err != nil {
+			log.Fatalf("Error sending start message to client %s: %s", c.ID, err)
+		}
+	}
+}
+
+func (r *Room) updateOpponent(c *Client) {
+	updateMessage := opponentUpdate{
+		MessageType:       "opponentUpdate",
+		OpponentHazelnuts: c.Hazelnuts,
+	}
+
+	log.Printf("Updating opponent. Client %s, Clients: %v", c.ID, r.Clients)
+	// Find opponent and send them an update with clients points
+	for _, opp := range r.Clients {
+		log.Printf("client %s", c.ID)
+		if opp.ID != c.ID {
+			if err := opp.Conn.WriteJSON(updateMessage); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
 }

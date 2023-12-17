@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"log"
 )
 
 type Client struct {
-	ID     uuid.UUID
-	Conn   *websocket.Conn
-	Room   *Room
-	Points int
-	Problem *Problem
+	ID        uuid.UUID
+	Conn      *websocket.Conn
+	Room      *Room
+	Hazelnuts int
+	Problem   *Problem
 }
 
 func NewClient(conn *websocket.Conn) *Client {
@@ -30,30 +30,54 @@ func (c *Client) handleMessages() {
 	defer c.Conn.Close()
 
 	for {
-		// Read message from WebSocket
-		messageType, message, err := c.Conn.ReadMessage()
+		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
-			log.Printf("Error reading message: %v", err)
-			break
+			log.Fatalf("Error receiving message from client %s: %s", c.ID, err)
 		}
 
-		// Process the message
-		log.Printf("Received message from client %s: %s", c.ID, string(message))
-
-		// For example, you can echo the message back to the client
-		if err := c.Conn.WriteMessage(messageType, []byte(fmt.Sprintf("Received message: %s", message))); err != nil {
-			log.Println("Error writing message:", err)
-			break
+		bm := &baseMessage{}
+		err = json.Unmarshal(message, bm)
+		if err != nil {
+			log.Fatalf("Error unmarshaling base message: %s", err)
 		}
 
+		log.Printf("Received message from client %s: %v", c.ID, message)
+
+		switch bm.MessageType {
+		case "answer":
+			// Parse answer
+			am := &answerMessage{}
+			err = json.Unmarshal(message, am)
+			// Validate answer against client solution
+			log.Printf("User %s sent answer %s, actual answer was: %s", c.ID, am.Answer, c.Problem.solution)
+			correct := c.Problem.checkSolution(am.Answer)
+
+			if correct {
+				c.Hazelnuts += 10
+			} else {
+				c.Hazelnuts -= 10
+			}
+			c.updateProblem()
+
+			rm := resultMessage{
+				MessageType:   "result",
+				ResultCorrect: correct,
+				Problem:       c.Problem.problem,
+				Hazelnuts:     c.Hazelnuts,
+			}
+			if err := c.Conn.WriteJSON(rm); err != nil {
+				log.Fatalf("sending result to client %s: %s", c.ID, err)
+			}
+			c.Room.updateOpponent(c)
+		}
 		// Implement other logic here, like handling game actions
 	}
 }
 
 func (c *Client) updateProblem() {
-	if c.Points > 100 {
+	if c.Hazelnuts > 100 {
 		c.Problem = randomMxbProblem()
-	} else if c.Points > 50 {
+	} else if c.Hazelnuts > 50 {
 		c.Problem = randomAdditionProblem(true)
 	} else {
 		c.Problem = randomAdditionProblem(false)

@@ -37,6 +37,7 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 	// Create a new client instance
 	client := NewClient(c)
 
+	// Debug
 	client.Conn.WriteMessage(websocket.TextMessage, []byte("Hello!"))
 
 	rooms.JoinAnyRoom(client)
