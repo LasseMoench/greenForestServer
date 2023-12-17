@@ -2,42 +2,46 @@ package main
 
 import (
 	"testing"
-	"fmt"
 )
 
-func TestCheckSolution_WrongInput(t *testing.T) {
-	p := Problem{
-		problem: "x + 9 = 11",
-		solution: "2",
+func TestCheckSolution(t *testing.T) {
+	var testCases = []struct{
+		name string
+		p Problem
+		s string
+		want bool
+	}{
+		{"Correct solution", Problem{"x + 1 = 2", "1"}, "1", true},
+		{"Wrong solution", Problem{"x + 1 = 2", "1"}, "0", false},
 	}
 
-	givenSolution := "3"
-	expected := false
-	check := p.checkSolution(givenSolution)
-	if check != expected {
-		t.Fatalf(`p.checkSolution("%s") = %t, want %t`, givenSolution, check, expected )
-	}
-}
-
-func TestCheckSolution_CorrectInput(t *testing.T) {
-	p := Problem{
-		problem: "x + 9 = 11",
-		solution: "2",
-	}
-
-	givenSolution := "2"
-	expected := true
-	check := p.checkSolution(givenSolution)
-	if check != expected {
-		t.Fatalf(`p.checkSolution("%s") = %t, want %t`, givenSolution, check, expected )
+	for _,tc := range testCases {
+		t.Run(tc.name, func(t *testing.T){
+			check : = tc.p.checkSolution(tc.s)
+			if check != tc.want {
+				t.Errorf(`Problem{"%s", "%s"}.checkSolution("%s") = %t, want %t`, tc.p.problem, tc.p.solution, tc.s, check, tc.want)
+			}
+		})
 	}
 }
 
 func TestAdditionProblem(t *testing.T) {
-	x := 5
-	p := additionProblem(x, -3)
+	var testCases = []struct{
+		name string
+		x int
+		b int
+		pe Problem
+	}{
+		{"Positive b", 5, 3, Problem{"x + 3 = 8", "5"}},
+		{"Negative b", 5, -3, Problem{"x - 3 = 2", "5"}},
+	}
 
-	if !p.checkSolution(fmt.Sprintf("%d", x)){
-		t.Fatalf(`Problem {'%s', '%s'} did not accept '%d' as the solution`, p.problem, p.solution, x)
+	for _, tc := range testCases {
+		t.Run(tc.name, func (t *testing.T){
+			p := additionProblem(tc.x, tc.b)
+			if p.problem != tc.pe.problem || !p.checkSolution(tc.pe.solution) {
+				t.Errorf(`additionProblem(%d, %d) == Problem{"%s", "%s"}, want Problem{"%s", "%s"}`, tc.x, tc.b, p.problem, p.solution, tc.pe.problem, tc.pe.solution)
+			}
+		})
 	}
 }
