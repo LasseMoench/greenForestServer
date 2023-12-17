@@ -25,16 +25,6 @@ func (p *Problem) checkSolution(solution string) bool {
 	return is == pis
 }
 
-func ProblemForClient(c *Client) *Problem {
-	if c.Points > 100 {
-		return randomMxbProblem()
-	} else if c.Points > 50 {
-		return randomAdditionProblem(true)
-	} else {
-		return randomAdditionProblem(false)
-	}
-}
-
 func additionProblem(x int, b int) *Problem {
 	var signB string
 	var absB int
