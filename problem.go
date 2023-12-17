@@ -3,6 +3,8 @@ package main
 import (
 	"math/rand"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 type Problem struct {
@@ -11,7 +13,15 @@ type Problem struct {
 }
 
 func (p *Problem) checkSolution(solution string) bool {
-	return solution == p.solution
+	pis, err := strconv.Atoi(p.solution)
+	if err != nil { panic(fmt.Sprintf("Invalid solution %s", p.solution)) }
+
+	r := strings.NewReplacer(" ", "", "\t", "", "\n", "");
+	is, err := strconv.Atoi(r.Replace(solution))
+	if err != nil {
+		 return false
+	}
+	return is == pis
 }
 
 func ProblemForClient(c *Client) *Problem {

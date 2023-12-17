@@ -12,12 +12,13 @@ func TestCheckSolution(t *testing.T) {
 		want bool
 	}{
 		{"Correct solution", Problem{"x + 1 = 2", "1"}, "1", true},
+		{"Correct solution with different format", Problem{"x + 1 = 2", "1"}, " + 1 ", true},
 		{"Wrong solution", Problem{"x + 1 = 2", "1"}, "0", false},
 	}
 
 	for _,tc := range testCases {
 		t.Run(tc.name, func(t *testing.T){
-			check : = tc.p.checkSolution(tc.s)
+			check := tc.p.checkSolution(tc.s)
 			if check != tc.want {
 				t.Errorf(`Problem{"%s", "%s"}.checkSolution("%s") = %t, want %t`, tc.p.problem, tc.p.solution, tc.s, check, tc.want)
 			}
@@ -40,7 +41,7 @@ func TestAdditionProblem(t *testing.T) {
 		t.Run(tc.name, func (t *testing.T){
 			p := additionProblem(tc.x, tc.b)
 			if p.problem != tc.pe.problem || !p.checkSolution(tc.pe.solution) {
-				t.Errorf(`additionProblem(%d, %d) == Problem{"%s", "%s"}, want Problem{"%s", "%s"}`, tc.x, tc.b, p.problem, p.solution, tc.pe.problem, tc.pe.solution)
+				t.Errorf(`additionProblem(%d, %d) = Problem{"%s", "%s"}, want Problem{"%s", "%s"}`, tc.x, tc.b, p.problem, p.solution, tc.pe.problem, tc.pe.solution)
 			}
 		})
 	}
